@@ -78,6 +78,11 @@ async function run() {
             const result = await storyCollection.find().toArray();
             res.send(result)
         })
+        app.get('/stories/:id', async (req, res) => {
+            const id = req.params._id;
+            const result = await storyCollection.findOne(id);
+            res.send(result)
+        })
 
         app.post('/packages', async (req, res) => {
 
