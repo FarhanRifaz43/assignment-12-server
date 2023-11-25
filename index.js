@@ -56,6 +56,7 @@ async function run() {
     const packageCollection = client.db('embark-escapes-db').collection('tourPackages')
     const guideCollection = client.db('embark-escapes-db').collection('guides')
     const userCollection = client.db('embark-escapes-db').collection('users')
+    const storyCollection = client.db('embark-escapes-db').collection('stories')
 
     try {
 
@@ -67,6 +68,14 @@ async function run() {
 
         app.get('/packages', async (req, res) => {
             const result = await packageCollection.find().toArray();
+            res.send(result)
+        })
+        app.get('/users', async (req, res) => {
+            const result = await userCollection.find().toArray();
+            res.send(result)
+        })
+        app.get('/stories', async (req, res) => {
+            const result = await storyCollection.find().toArray();
             res.send(result)
         })
 
