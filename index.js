@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const port = process.env.PORT || 3000;
 
@@ -70,6 +70,12 @@ async function run() {
             const result = await packageCollection.find().toArray();
             res.send(result)
         })
+        app.get('/packages/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await packageCollection.findOne(query);
+            res.send(result)
+        })
         app.get('/users', async (req, res) => {
             const result = await userCollection.find().toArray();
             res.send(result)
@@ -79,8 +85,9 @@ async function run() {
             res.send(result)
         })
         app.get('/stories/:id', async (req, res) => {
-            const id = req.params._id;
-            const result = await storyCollection.findOne(id);
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await storyCollection.findOne(query);
             res.send(result)
         })
 
