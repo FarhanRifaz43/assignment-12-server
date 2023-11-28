@@ -57,6 +57,7 @@ async function run() {
     const guideCollection = client.db('embark-escapes-db').collection('guides')
     const userCollection = client.db('embark-escapes-db').collection('users')
     const storyCollection = client.db('embark-escapes-db').collection('stories')
+    const bookingCollection = client.db('embark-escapes-db').collection('bookings')
 
     try {
 
@@ -65,7 +66,6 @@ async function run() {
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
             res.send({ token })
         })
-
         app.get('/packages', async (req, res) => {
             const result = await packageCollection.find().toArray();
             res.send(result)
@@ -76,6 +76,12 @@ async function run() {
             const result = await packageCollection.findOne(query);
             res.send(result)
         })
+        app.get('/guides/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await guideCollection.findOne(query);
+            res.send(result)
+        })
         app.get('/users', async (req, res) => {
             const result = await userCollection.find().toArray();
             res.send(result)
@@ -84,12 +90,33 @@ async function run() {
             const result = await storyCollection.find().toArray();
             res.send(result)
         })
+        app.get('/bookings', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const result = await bookingCollection.find(query).toArray();
+            res.send(result);
+          });
         app.get('/stories/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await storyCollection.findOne(query);
             res.send(result)
         })
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        });
+        app.post('/stories', async (req, res) => {
+            const story = req.body;
+            const result = await storyCollection.insertOne(story);
+            res.send(result);
+        });
+        app.post('/bookings', async (req, res) => {
+            const booking = req.body;
+            const result = await bookingCollection.insertOne(booking);
+            res.send(result);
+        });
 
         app.post('/packages', async (req, res) => {
 
