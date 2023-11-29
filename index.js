@@ -58,6 +58,7 @@ async function run() {
     const userCollection = client.db('embark-escapes-db').collection('users')
     const storyCollection = client.db('embark-escapes-db').collection('stories')
     const bookingCollection = client.db('embark-escapes-db').collection('bookings')
+    const wishCollection = client.db('embark-escapes-db').collection('wishlist')
 
     try {
 
@@ -92,10 +93,16 @@ async function run() {
         })
         app.get('/bookings', async (req, res) => {
             const email = req.query.email;
-            const query = { email: email };
+            const query = { userEmail: email };
             const result = await bookingCollection.find(query).toArray();
             res.send(result);
-          });
+        });
+        app.get('/wishlist', async (req, res) => {
+            const email = req.query.email;
+            const query = { userEmail: email };
+            const result = await wishCollection.find(query).toArray();
+            res.send(result);
+        });
         app.get('/stories/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
@@ -117,14 +124,76 @@ async function run() {
             const result = await bookingCollection.insertOne(booking);
             res.send(result);
         });
+        app.post('/wishlist', async (req, res) => {
+            const wish = req.body;
+            const result = await wishCollection.insertOne(wish);
+            res.send(result);
+        });
 
         app.post('/packages', async (req, res) => {
-
+            const pack = req.body;
+            const result = await packageCollection.insertOne(pack);
+            res.send(result);
+        })
+        app.post('/guides', async (req, res) => {
+            const guide = req.body;
+            const result = await guideCollection.insertOne(guide);
+            res.send(result);
         })
 
         app.get('/guides', async (req, res) => {
             const result = await guideCollection.find().toArray();
             res.send(result)
+        })
+        app.get('/users/guide/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            let guide = false;
+            if (user) {
+                guide = user?.role === 'guide';
+            }
+            res.send({ guide });
+        })
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            let admin = false;
+            if (user) {
+                admin = user?.role === 'admin';
+            }
+            res.send({ admin });
+        })
+        app.patch('/guides/:email', async (req, res) => {
+            const email = req.params.email;
+            const guide = req.body;
+            const filter = { email: email };
+            const updatedDoc = {
+                $set: {
+                    name: guide.name,
+                    image: guide.image,
+                    phone: guide.phone,
+                    email: guide.email,
+                    education: guide.email,
+                    skills: guide.skills,
+                    experience: guide.experience
+                }
+            }
+            const result = await guideCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+        app.patch('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const guide = req.body;
+            const filter = { email: email };
+            const updatedDoc = {
+                $set: {
+                    role: guide.role
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result);
         })
 
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
