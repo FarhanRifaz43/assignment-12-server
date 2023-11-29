@@ -61,12 +61,6 @@ async function run() {
     const wishCollection = client.db('embark-escapes-db').collection('wishlist')
 
     try {
-
-        app.get('/jwt', async (req, res) => {
-            const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-            res.send({ token })
-        })
         app.get('/packages', async (req, res) => {
             const result = await packageCollection.find().toArray();
             res.send(result)
@@ -87,11 +81,15 @@ async function run() {
             const result = await userCollection.find().toArray();
             res.send(result)
         })
+        app.get('/bookings', async (req, res) => {
+            const result = await bookingCollection.find().toArray();
+            res.send(result)
+        })
         app.get('/stories', async (req, res) => {
             const result = await storyCollection.find().toArray();
             res.send(result)
         })
-        app.get('/bookings', async (req, res) => {
+        app.get('/bookings/user', async (req, res) => {
             const email = req.query.email;
             const query = { userEmail: email };
             const result = await bookingCollection.find(query).toArray();
@@ -193,6 +191,30 @@ async function run() {
                 }
             }
             const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+        app.patch('/bookings/:email', async (req, res) => {
+            const email = req.params.email;
+            const status = req.body;
+            const filter = { userEmail: email };
+            const updatedDoc = {
+                $set: {
+                    status: status.state
+                }
+            }
+            const result = await bookingCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+        app.delete('/wishlist/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await wishCollection.deleteOne(query);
+            res.send(result);
+        })
+        app.delete('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await bookingCollection.deleteOne(query);
             res.send(result);
         })
 
